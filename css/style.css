@@ -1,6 +1,8 @@
 main{
     width:80%;
-    text-align: center;
+    margin:auto;
 }
 
-h1{margin:auto;}
+h1{
+    text-align: center;
+}
