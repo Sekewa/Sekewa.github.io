@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exercice 2 - Babylon.js Scene</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        canvas {
+            width: 100%;
+            height: 100vh;
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="renderCanvas"></canvas>
+
+    <!-- Babylon.js CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs/6.0.0/babylon.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babylonjs-loaders/6.0.0/babylonjs.loaders.min.js"></script>
+
+    <script>
+        let model3D;
+        // Création du moteur et de la scène
+        const canvas = document.getElementById("renderCanvas");
+        const engine = new BABYLON.Engine(canvas, true);
+        const scene = new BABYLON.Scene(engine);
+
+        // Création de la caméra
+        const camera = new BABYLON.ArcRotateCamera("camera", -Math.PI / 2, Math.PI / 2.5, 10, BABYLON.Vector3.Zero(), scene);
+        camera.position.z = 5;
+
+        // Éclairage directif
+        const directionalLight = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -1, -1), scene);
+        directionalLight.intensity = 1;
+
+        // Éclairage ambiant
+        const ambientLight = new BABYLON.HemisphericLight("ambientLight", new BABYLON.Vector3(0, 1, 0), scene);
+        ambientLight.intensity = 0.5;
+
+        // Création d'un objet générique (cube)
+        const box = BABYLON.MeshBuilder.CreateBox("box", {size: 1}, scene);
+        
+        // Texturage de l'objet
+        const boxMaterial = new BABYLON.StandardMaterial("boxMaterial", scene);
+        const texture = new BABYLON.Texture("https://playground.babylonjs.com/textures/grass.jpg", scene);
+        boxMaterial.diffuseTexture = texture;
+        box.material = boxMaterial;
+
+        BABYLON.SceneLoader.Append("model/", "scene.gltf", scene, 
+            function (loadedScene) {
+                model3D = loadedScene.meshes[loadedScene.meshes.length -1];
+                model3D.position = new BABYLON.Vector3(2,0,0);
+                model3D.scaling = new BABYLON.Vector3(1,1,1);
+            }, 
+            undefined,
+            function (scene, message, exception) {
+                console.error("Erreur : ", message, exception);
+            }
+        );
+
+        // Variables pour stocker l'inclinaison du smartphone
+        let beta = 0;  // inclinaison avant/arrière (x)
+        let gamma = 0; // inclinaison gauche/droite (y)
+
+        // Animation avec orientation du smartphone
+        window.addEventListener("deviceorientation", (event) => {
+            // beta = inclinaison avant/arrière [-180,180]
+            beta = event.beta || 0;
+            
+            // gamma = inclinaison gauche/droite [-90,90]
+            gamma = event.gamma || 0;
+        });
+
+        // Fonction d'animation
+        function animate() {
+            // Rotation du cube basée sur l'orientation du smartphone
+            box.rotation.x = BABYLON.Tools.ToRadians(beta);
+            box.rotation.y = BABYLON.Tools.ToRadians(gamma);
+        }
+
+        // Ajout de particules (équivalent fog/pluie)
+        const particleSystem = new BABYLON.ParticleSystem("particles", 2000, scene);
+        particleSystem.particleTexture = new BABYLON.Texture("https://playground.babylonjs.com/textures/flare.png", scene);
+        particleSystem.emitter = BABYLON.Vector3.Zero();
+        particleSystem.minEmitBox = new BABYLON.Vector3(-5, 8, -5);
+        particleSystem.maxEmitBox = new BABYLON.Vector3(5, 8, 5);
+        particleSystem.color1 = new BABYLON.Color4(0.7, 0.8, 1.0, 1.0);
+        particleSystem.color2 = new BABYLON.Color4(0.2, 0.5, 1.0, 1.0);
+        particleSystem.direction1 = new BABYLON.Vector3(-2, -8, 2);
+        particleSystem.direction2 = new BABYLON.Vector3(2, -8, -2);
+        particleSystem.minLifeTime = 1;
+        particleSystem.maxLifeTime = 3;
+        particleSystem.emitRate = 1000;
+        particleSystem.start();
+
+        // Redimensionnement automatique
+        window.addEventListener("resize", () => {
+            engine.resize();
+        });
+
+        // Boucle de rendu (équivalent renderer.setAnimationLoop)
+        engine.runRenderLoop(() => {
+            animate();
+            scene.render();
+        });
+
+        // Nettoyage à la fermeture
+        window.addEventListener("beforeunload", () => {
+            engine.dispose();
+        });
+    </script>
+</body>
+</html>
