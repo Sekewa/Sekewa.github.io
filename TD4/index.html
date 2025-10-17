@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Mini-Jeu Voiture — Babylon.js</title>
+<link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+<canvas id="renderCanvas"></canvas>
+
+
+<div id="ui">
+<div id="hud">
+<div id="status">Distance au but: <span id="distance">?</span> m</div>
+<div id="buttons">
+<button id="respawn">Respawn</button>
+<button id="restart">Nouvelle carte</button>
+</div>
+</div>
+<div id="message" class="hidden"></div>
+</div>
+
+
+<!-- Babylon CDN -->
+<script src="https://cdn.babylonjs.com/babylon.js"></script>
+<script src="https://cdn.babylonjs.com/loaders/babylonjs.loaders.min.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
